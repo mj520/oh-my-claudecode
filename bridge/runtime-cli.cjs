@@ -5,9 +5,6 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -29,154 +26,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-
-// node_modules/jsonc-parser/lib/umd/main.js
-var require_main = __commonJS({
-  "node_modules/jsonc-parser/lib/umd/main.js"(exports2, module2) {
-    (function(factory) {
-      if (typeof module2 === "object" && typeof module2.exports === "object") {
-        var v = factory(require, exports2);
-        if (v !== void 0) module2.exports = v;
-      } else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./impl/format", "./impl/edit", "./impl/scanner", "./impl/parser"], factory);
-      }
-    })(function(require2, exports3) {
-      "use strict";
-      Object.defineProperty(exports3, "__esModule", { value: true });
-      exports3.applyEdits = exports3.modify = exports3.format = exports3.printParseErrorCode = exports3.ParseErrorCode = exports3.stripComments = exports3.visit = exports3.getNodeValue = exports3.getNodePath = exports3.findNodeAtOffset = exports3.findNodeAtLocation = exports3.parseTree = exports3.parse = exports3.getLocation = exports3.SyntaxKind = exports3.ScanError = exports3.createScanner = void 0;
-      const formatter = require2("./impl/format");
-      const edit = require2("./impl/edit");
-      const scanner = require2("./impl/scanner");
-      const parser = require2("./impl/parser");
-      exports3.createScanner = scanner.createScanner;
-      var ScanError;
-      (function(ScanError2) {
-        ScanError2[ScanError2["None"] = 0] = "None";
-        ScanError2[ScanError2["UnexpectedEndOfComment"] = 1] = "UnexpectedEndOfComment";
-        ScanError2[ScanError2["UnexpectedEndOfString"] = 2] = "UnexpectedEndOfString";
-        ScanError2[ScanError2["UnexpectedEndOfNumber"] = 3] = "UnexpectedEndOfNumber";
-        ScanError2[ScanError2["InvalidUnicode"] = 4] = "InvalidUnicode";
-        ScanError2[ScanError2["InvalidEscapeCharacter"] = 5] = "InvalidEscapeCharacter";
-        ScanError2[ScanError2["InvalidCharacter"] = 6] = "InvalidCharacter";
-      })(ScanError || (exports3.ScanError = ScanError = {}));
-      var SyntaxKind;
-      (function(SyntaxKind2) {
-        SyntaxKind2[SyntaxKind2["OpenBraceToken"] = 1] = "OpenBraceToken";
-        SyntaxKind2[SyntaxKind2["CloseBraceToken"] = 2] = "CloseBraceToken";
-        SyntaxKind2[SyntaxKind2["OpenBracketToken"] = 3] = "OpenBracketToken";
-        SyntaxKind2[SyntaxKind2["CloseBracketToken"] = 4] = "CloseBracketToken";
-        SyntaxKind2[SyntaxKind2["CommaToken"] = 5] = "CommaToken";
-        SyntaxKind2[SyntaxKind2["ColonToken"] = 6] = "ColonToken";
-        SyntaxKind2[SyntaxKind2["NullKeyword"] = 7] = "NullKeyword";
-        SyntaxKind2[SyntaxKind2["TrueKeyword"] = 8] = "TrueKeyword";
-        SyntaxKind2[SyntaxKind2["FalseKeyword"] = 9] = "FalseKeyword";
-        SyntaxKind2[SyntaxKind2["StringLiteral"] = 10] = "StringLiteral";
-        SyntaxKind2[SyntaxKind2["NumericLiteral"] = 11] = "NumericLiteral";
-        SyntaxKind2[SyntaxKind2["LineCommentTrivia"] = 12] = "LineCommentTrivia";
-        SyntaxKind2[SyntaxKind2["BlockCommentTrivia"] = 13] = "BlockCommentTrivia";
-        SyntaxKind2[SyntaxKind2["LineBreakTrivia"] = 14] = "LineBreakTrivia";
-        SyntaxKind2[SyntaxKind2["Trivia"] = 15] = "Trivia";
-        SyntaxKind2[SyntaxKind2["Unknown"] = 16] = "Unknown";
-        SyntaxKind2[SyntaxKind2["EOF"] = 17] = "EOF";
-      })(SyntaxKind || (exports3.SyntaxKind = SyntaxKind = {}));
-      exports3.getLocation = parser.getLocation;
-      exports3.parse = parser.parse;
-      exports3.parseTree = parser.parseTree;
-      exports3.findNodeAtLocation = parser.findNodeAtLocation;
-      exports3.findNodeAtOffset = parser.findNodeAtOffset;
-      exports3.getNodePath = parser.getNodePath;
-      exports3.getNodeValue = parser.getNodeValue;
-      exports3.visit = parser.visit;
-      exports3.stripComments = parser.stripComments;
-      var ParseErrorCode;
-      (function(ParseErrorCode2) {
-        ParseErrorCode2[ParseErrorCode2["InvalidSymbol"] = 1] = "InvalidSymbol";
-        ParseErrorCode2[ParseErrorCode2["InvalidNumberFormat"] = 2] = "InvalidNumberFormat";
-        ParseErrorCode2[ParseErrorCode2["PropertyNameExpected"] = 3] = "PropertyNameExpected";
-        ParseErrorCode2[ParseErrorCode2["ValueExpected"] = 4] = "ValueExpected";
-        ParseErrorCode2[ParseErrorCode2["ColonExpected"] = 5] = "ColonExpected";
-        ParseErrorCode2[ParseErrorCode2["CommaExpected"] = 6] = "CommaExpected";
-        ParseErrorCode2[ParseErrorCode2["CloseBraceExpected"] = 7] = "CloseBraceExpected";
-        ParseErrorCode2[ParseErrorCode2["CloseBracketExpected"] = 8] = "CloseBracketExpected";
-        ParseErrorCode2[ParseErrorCode2["EndOfFileExpected"] = 9] = "EndOfFileExpected";
-        ParseErrorCode2[ParseErrorCode2["InvalidCommentToken"] = 10] = "InvalidCommentToken";
-        ParseErrorCode2[ParseErrorCode2["UnexpectedEndOfComment"] = 11] = "UnexpectedEndOfComment";
-        ParseErrorCode2[ParseErrorCode2["UnexpectedEndOfString"] = 12] = "UnexpectedEndOfString";
-        ParseErrorCode2[ParseErrorCode2["UnexpectedEndOfNumber"] = 13] = "UnexpectedEndOfNumber";
-        ParseErrorCode2[ParseErrorCode2["InvalidUnicode"] = 14] = "InvalidUnicode";
-        ParseErrorCode2[ParseErrorCode2["InvalidEscapeCharacter"] = 15] = "InvalidEscapeCharacter";
-        ParseErrorCode2[ParseErrorCode2["InvalidCharacter"] = 16] = "InvalidCharacter";
-      })(ParseErrorCode || (exports3.ParseErrorCode = ParseErrorCode = {}));
-      function printParseErrorCode(code) {
-        switch (code) {
-          case 1:
-            return "InvalidSymbol";
-          case 2:
-            return "InvalidNumberFormat";
-          case 3:
-            return "PropertyNameExpected";
-          case 4:
-            return "ValueExpected";
-          case 5:
-            return "ColonExpected";
-          case 6:
-            return "CommaExpected";
-          case 7:
-            return "CloseBraceExpected";
-          case 8:
-            return "CloseBracketExpected";
-          case 9:
-            return "EndOfFileExpected";
-          case 10:
-            return "InvalidCommentToken";
-          case 11:
-            return "UnexpectedEndOfComment";
-          case 12:
-            return "UnexpectedEndOfString";
-          case 13:
-            return "UnexpectedEndOfNumber";
-          case 14:
-            return "InvalidUnicode";
-          case 15:
-            return "InvalidEscapeCharacter";
-          case 16:
-            return "InvalidCharacter";
-        }
-        return "<unknown ParseErrorCode>";
-      }
-      exports3.printParseErrorCode = printParseErrorCode;
-      function format(documentText, range, options) {
-        return formatter.format(documentText, range, options);
-      }
-      exports3.format = format;
-      function modify(text, path, value, options) {
-        return edit.setProperty(text, path, value, options);
-      }
-      exports3.modify = modify;
-      function applyEdits(text, edits) {
-        let sortedEdits = edits.slice(0).sort((a, b) => {
-          const diff = a.offset - b.offset;
-          if (diff === 0) {
-            return a.length - b.length;
-          }
-          return diff;
-        });
-        let lastModifiedOffset = text.length;
-        for (let i = sortedEdits.length - 1; i >= 0; i--) {
-          let e = sortedEdits[i];
-          if (e.offset + e.length <= lastModifiedOffset) {
-            text = edit.applyEdit(text, e);
-          } else {
-            throw new Error("Overlapping edit");
-          }
-          lastModifiedOffset = e.offset;
-        }
-        return text;
-      }
-      exports3.applyEdits = applyEdits;
-    });
-  }
-});
 
 // src/team/runtime-cli.ts
 var runtime_cli_exports = {};
@@ -211,6 +60,67 @@ function validateTeamName(teamName) {
 }
 
 // src/team/model-contract.ts
+var resolvedPathCache = /* @__PURE__ */ new Map();
+var UNTRUSTED_PATH_PATTERNS = [
+  /^\/tmp(\/|$)/,
+  /^\/var\/tmp(\/|$)/,
+  /^\/dev\/shm(\/|$)/
+];
+function getTrustedPrefixes() {
+  const trusted = [
+    "/usr/local/bin",
+    "/usr/bin",
+    "/opt/homebrew/"
+  ];
+  const home = process.env.HOME;
+  if (home) {
+    trusted.push(`${home}/.local/bin`);
+    trusted.push(`${home}/.nvm/`);
+    trusted.push(`${home}/.cargo/bin`);
+  }
+  const custom = (process.env.OMC_TRUSTED_CLI_DIRS ?? "").split(":").map((part) => part.trim()).filter(Boolean).filter((part) => (0, import_path.isAbsolute)(part));
+  trusted.push(...custom);
+  return trusted;
+}
+function isTrustedPrefix(resolvedPath) {
+  const normalized = (0, import_path.normalize)(resolvedPath);
+  return getTrustedPrefixes().some((prefix) => normalized.startsWith((0, import_path.normalize)(prefix)));
+}
+function assertBinaryName(binary) {
+  if (!/^[A-Za-z0-9._-]+$/.test(binary)) {
+    throw new Error(`Invalid CLI binary name: ${binary}`);
+  }
+}
+function resolveCliBinaryPath(binary) {
+  assertBinaryName(binary);
+  const cached = resolvedPathCache.get(binary);
+  if (cached) return cached;
+  const finder = process.platform === "win32" ? "where" : "which";
+  const result = (0, import_child_process.spawnSync)(finder, [binary], {
+    timeout: 5e3,
+    env: process.env
+  });
+  if (result.status !== 0) {
+    throw new Error(`CLI binary '${binary}' not found in PATH`);
+  }
+  const stdout = result.stdout?.toString().trim() ?? "";
+  const firstLine = stdout.split("\n").map((line) => line.trim()).find(Boolean) ?? "";
+  if (!firstLine) {
+    throw new Error(`CLI binary '${binary}' not found in PATH`);
+  }
+  const resolvedPath = (0, import_path.normalize)(firstLine);
+  if (!(0, import_path.isAbsolute)(resolvedPath)) {
+    throw new Error(`Resolved CLI binary '${binary}' to relative path`);
+  }
+  if (UNTRUSTED_PATH_PATTERNS.some((pattern) => pattern.test(resolvedPath))) {
+    throw new Error(`Resolved CLI binary '${binary}' to untrusted location: ${resolvedPath}`);
+  }
+  if (!isTrustedPrefix(resolvedPath)) {
+    console.warn(`[omc:cli-security] CLI binary '${binary}' resolved to non-standard path: ${resolvedPath}`);
+  }
+  resolvedPathCache.set(binary, resolvedPath);
+  return resolvedPath;
+}
 var CONTRACTS = {
   claude: {
     agentType: "claude",
@@ -297,28 +207,9 @@ function resolveBinaryPath(binary) {
     return binary;
   }
 }
-function isCliAvailable(agentType) {
+function resolveValidatedBinaryPath(agentType) {
   const contract = getContract(agentType);
-  try {
-    const resolvedBinary = resolveBinaryPath(contract.binary);
-    if (process.platform === "win32" && /\.(cmd|bat)$/i.test(resolvedBinary)) {
-      const comspec = process.env.COMSPEC || "cmd.exe";
-      const result2 = (0, import_child_process.spawnSync)(comspec, ["/d", "/s", "/c", `"${resolvedBinary}" --version`], { timeout: 5e3 });
-      return result2.status === 0;
-    }
-    const result = (0, import_child_process.spawnSync)(resolvedBinary, ["--version"], { timeout: 5e3 });
-    return result.status === 0;
-  } catch {
-    return false;
-  }
-}
-function validateCliAvailable(agentType) {
-  if (!isCliAvailable(agentType)) {
-    const contract = getContract(agentType);
-    throw new Error(
-      `CLI agent '${agentType}' not found. ${contract.installInstructions}`
-    );
-  }
+  return resolveCliBinaryPath(contract.binary);
 }
 function buildLaunchArgs(agentType, config) {
   return getContract(agentType).buildLaunchArgs(config.model, config.extraFlags);
@@ -326,7 +217,10 @@ function buildLaunchArgs(agentType, config) {
 function buildWorkerArgv(agentType, config) {
   validateTeamName(config.teamName);
   const contract = getContract(agentType);
-  const binary = resolveBinaryPath(contract.binary);
+  const binary = config.resolvedBinaryPath ? (() => {
+    validateBinaryRef(config.resolvedBinaryPath);
+    return config.resolvedBinaryPath;
+  })() : resolveBinaryPath(contract.binary);
   const args = buildLaunchArgs(agentType, config);
   return [binary, ...args];
 }
@@ -358,6 +252,7 @@ var import_child_process2 = require("child_process");
 var import_path2 = require("path");
 var import_util = require("util");
 var import_promises = __toESM(require("fs/promises"), 1);
+var sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 var TMUX_SESSION_PREFIX = "omc-team";
 var promisifiedExec = (0, import_util.promisify)(import_child_process2.exec);
 var promisifiedExecFile = (0, import_util.promisify)(import_child_process2.execFile);
@@ -392,10 +287,23 @@ function assertSafeEnvKey(key) {
     throw new Error(`Invalid environment key: "${key}"`);
   }
 }
-function assertSafeLaunchBinary(binary) {
-  if (/^[A-Za-z0-9._/-]+$/.test(binary)) return;
-  if (/^[A-Za-z]:[\\/][A-Za-z0-9._\\/-]+$/.test(binary)) return;
-  throw new Error(`Invalid launchBinary: "${binary}"`);
+var DANGEROUS_LAUNCH_BINARY_CHARS = /[;&|`$()<>\n\r\t\0]/;
+function isAbsoluteLaunchBinaryPath(value) {
+  return (0, import_path2.isAbsolute)(value) || import_path2.win32.isAbsolute(value);
+}
+function assertSafeLaunchBinary(launchBinary) {
+  if (launchBinary.trim().length === 0) {
+    throw new Error("Invalid launchBinary: value cannot be empty");
+  }
+  if (launchBinary !== launchBinary.trim()) {
+    throw new Error("Invalid launchBinary: value cannot have leading/trailing whitespace");
+  }
+  if (DANGEROUS_LAUNCH_BINARY_CHARS.test(launchBinary)) {
+    throw new Error("Invalid launchBinary: contains dangerous shell metacharacters");
+  }
+  if (/\s/.test(launchBinary) && !isAbsoluteLaunchBinaryPath(launchBinary)) {
+    throw new Error("Invalid launchBinary: paths with spaces must be absolute");
+  }
 }
 function getLaunchWords(config) {
   if (config.launchBinary) {
@@ -410,6 +318,7 @@ function getLaunchWords(config) {
 function buildWorkerStartCommand(config) {
   const shell = getDefaultShell();
   const launchWords = getLaunchWords(config);
+  const shouldSourceRc = process.env.OMC_TEAM_NO_RC !== "1";
   if (process.platform === "win32" && !isUnixLikeOnWindows()) {
     const envPrefix = Object.entries(config.envVars).map(([k, v]) => {
       assertSafeEnvKey(k);
@@ -426,7 +335,7 @@ function buildWorkerStartCommand(config) {
     });
     const shellName2 = shellNameFromPath(shell) || "bash";
     const rcFile2 = process.env.HOME ? `${process.env.HOME}/.${shellName2}rc` : "";
-    const script = rcFile2 ? `[ -f ${shellEscape(rcFile2)} ] && . ${shellEscape(rcFile2)}; exec "$@"` : 'exec "$@"';
+    const script = shouldSourceRc && rcFile2 ? `[ -f ${shellEscape(rcFile2)} ] && . ${shellEscape(rcFile2)}; exec "$@"` : 'exec "$@"';
     return [
       "env",
       ...envAssignments,
@@ -443,7 +352,7 @@ function buildWorkerStartCommand(config) {
   }).join(" ");
   const shellName = shellNameFromPath(shell) || "bash";
   const rcFile = process.env.HOME ? `${process.env.HOME}/.${shellName}rc` : "";
-  const sourceCmd = rcFile ? `[ -f "${rcFile}" ] && source "${rcFile}"; ` : "";
+  const sourceCmd = shouldSourceRc && rcFile ? `[ -f "${rcFile}" ] && source "${rcFile}"; ` : "";
   return `env ${envString} ${shell} -c "${sourceCmd}exec ${launchWords[0]}"`;
 }
 function sanitizeName(name) {
@@ -632,6 +541,23 @@ function paneLooksReady(captured) {
   );
   return hasCodexHint;
 }
+async function waitForPaneReady(paneId, opts = {}) {
+  const envTimeout = Number.parseInt(process.env.OMC_SHELL_READY_TIMEOUT_MS ?? "", 10);
+  const timeoutMs = Number.isFinite(opts.timeoutMs) && (opts.timeoutMs ?? 0) > 0 ? Number(opts.timeoutMs) : Number.isFinite(envTimeout) && envTimeout > 0 ? envTimeout : 1e4;
+  const pollIntervalMs = Number.isFinite(opts.pollIntervalMs) && (opts.pollIntervalMs ?? 0) > 0 ? Number(opts.pollIntervalMs) : 250;
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const captured = await capturePaneAsync(paneId, promisifiedExecFile);
+    if (paneLooksReady(captured) && !paneHasActiveTask(captured)) {
+      return true;
+    }
+    await sleep(pollIntervalMs);
+  }
+  console.warn(
+    `[tmux-session] waitForPaneReady: pane ${paneId} timed out after ${timeoutMs}ms (set OMC_SHELL_READY_TIMEOUT_MS to tune)`
+  );
+  return false;
+}
 function paneTailContainsLiteralLine(captured, text) {
   return normalizeTmuxCapture(captured).includes(normalizeTmuxCapture(text));
 }
@@ -663,7 +589,7 @@ async function sendToWorker(_sessionName, paneId, message) {
     const { execFile: execFile2 } = await import("child_process");
     const { promisify: promisify2 } = await import("util");
     const execFileAsync = promisify2(execFile2);
-    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const sleep2 = (ms) => new Promise((r) => setTimeout(r, ms));
     const sendKey = async (key) => {
       await execFileAsync("tmux", ["send-keys", "-t", paneId, key]);
     };
@@ -674,28 +600,28 @@ async function sendToWorker(_sessionName, paneId, message) {
     const paneBusy = paneHasActiveTask(initialCapture);
     if (paneHasTrustPrompt(initialCapture)) {
       await sendKey("C-m");
-      await sleep(120);
+      await sleep2(120);
       await sendKey("C-m");
-      await sleep(200);
+      await sleep2(200);
     }
     await execFileAsync("tmux", ["send-keys", "-t", paneId, "-l", "--", message]);
-    await sleep(150);
+    await sleep2(150);
     const submitRounds = 6;
     for (let round = 0; round < submitRounds; round++) {
-      await sleep(100);
+      await sleep2(100);
       if (round === 0 && paneBusy) {
         await sendKey("Tab");
-        await sleep(80);
+        await sleep2(80);
         await sendKey("C-m");
       } else {
         await sendKey("C-m");
-        await sleep(200);
+        await sleep2(200);
         await sendKey("C-m");
       }
-      await sleep(140);
+      await sleep2(140);
       const checkCapture = await capturePaneAsync(paneId, execFileAsync);
       if (!paneTailContainsLiteralLine(checkCapture, message)) return true;
-      await sleep(140);
+      await sleep2(140);
     }
     if (await paneInCopyMode(paneId, execFileAsync)) {
       return false;
@@ -713,17 +639,17 @@ async function sendToWorker(_sessionName, paneId, message) {
         return false;
       }
       await sendKey("C-u");
-      await sleep(80);
+      await sleep2(80);
       if (await paneInCopyMode(paneId, execFileAsync)) {
         return false;
       }
       await execFileAsync("tmux", ["send-keys", "-t", paneId, "-l", "--", message]);
-      await sleep(120);
+      await sleep2(120);
       for (let round = 0; round < 4; round++) {
         await sendKey("C-m");
-        await sleep(180);
+        await sleep2(180);
         await sendKey("C-m");
-        await sleep(140);
+        await sleep2(140);
         const retryCapture = await capturePaneAsync(paneId, execFileAsync);
         if (!paneTailContainsLiteralLine(retryCapture, message)) return true;
       }
@@ -732,7 +658,7 @@ async function sendToWorker(_sessionName, paneId, message) {
       return false;
     }
     await sendKey("C-m");
-    await sleep(120);
+    await sleep2(120);
     await sendKey("C-m");
     return true;
   } catch {
@@ -1150,12 +1076,16 @@ async function readJsonSafe(filePath) {
           return null;
         }
       }
-    } catch {
+    } catch (error) {
+      const isMissingDoneSignal = isDoneSignalPath && typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
+      if (isMissingDoneSignal) {
+        return null;
+      }
       if (!isDoneSignalPath || attempt === maxAttempts) {
         return null;
       }
     }
-    await new Promise((resolve3) => setTimeout(resolve3, 25));
+    await new Promise((resolve4) => setTimeout(resolve4, 25));
   }
   return null;
 }
@@ -1261,8 +1191,18 @@ async function applyDeadPaneTransition(runtime, workerNameValue, taskId) {
 }
 async function nextPendingTaskIndex(runtime) {
   const root = stateRoot(runtime.cwd, runtime.teamName);
+  const transientReadRetryAttempts = 3;
+  const transientReadRetryDelayMs = 15;
   for (let i = 0; i < runtime.config.tasks.length; i++) {
-    const task = await readTask(root, String(i + 1));
+    const taskId = String(i + 1);
+    let task = await readTask(root, taskId);
+    if (!task) {
+      for (let attempt = 1; attempt < transientReadRetryAttempts; attempt++) {
+        await new Promise((resolve4) => setTimeout(resolve4, transientReadRetryDelayMs));
+        task = await readTask(root, taskId);
+        if (task) break;
+      }
+    }
     if (task?.status === "pending") return i;
   }
   return null;
@@ -1306,8 +1246,9 @@ function buildInitialTaskInstruction(teamName, workerName2, task, taskId) {
 async function startTeam(config) {
   const { teamName, agentTypes, tasks, cwd } = config;
   validateTeamName(teamName);
+  const resolvedBinaryPaths = {};
   for (const agentType of [...new Set(agentTypes)]) {
-    validateCliAvailable(agentType);
+    resolvedBinaryPaths[agentType] = resolveValidatedBinaryPath(agentType);
   }
   const root = stateRoot(cwd, teamName);
   await (0, import_promises3.mkdir)((0, import_path10.join)(root, "tasks"), { recursive: true });
@@ -1349,7 +1290,8 @@ async function startTeam(config) {
     workerPaneIds: session.workerPaneIds,
     // initially empty []
     activeWorkers: /* @__PURE__ */ new Map(),
-    cwd
+    cwd,
+    resolvedBinaryPaths
   };
   const maxConcurrentWorkers = agentTypes.length;
   for (let i = 0; i < maxConcurrentWorkers; i++) {
@@ -1570,10 +1512,16 @@ async function spawnWorkerForTask(runtime, workerNameValue, taskIndex) {
   await composeInitialInbox(runtime.teamName, workerNameValue, instruction, runtime.cwd);
   const relInboxPath = `.omc/state/team/${runtime.teamName}/workers/${workerNameValue}/inbox.md`;
   const envVars = getWorkerEnv(runtime.teamName, workerNameValue, agentType);
+  const resolvedBinaryPath = runtime.resolvedBinaryPaths?.[agentType] ?? resolveValidatedBinaryPath(agentType);
+  if (!runtime.resolvedBinaryPaths) {
+    runtime.resolvedBinaryPaths = {};
+  }
+  runtime.resolvedBinaryPaths[agentType] = resolvedBinaryPath;
   const [launchBinary, ...launchArgs] = buildWorkerArgv(agentType, {
     teamName: runtime.teamName,
     workerName: workerNameValue,
-    cwd: runtime.cwd
+    cwd: runtime.cwd,
+    resolvedBinaryPath
   });
   if (usePromptMode) {
     const promptArgs = getPromptModeArgs(agentType, `Read and execute your task from: ${relInboxPath}`);
@@ -1599,7 +1547,12 @@ async function spawnWorkerForTask(runtime, workerNameValue, taskIndex) {
   } catch {
   }
   if (!usePromptMode) {
-    await new Promise((r) => setTimeout(r, 4e3));
+    const paneReady = await waitForPaneReady(paneId);
+    if (!paneReady) {
+      await killWorkerPane(runtime, workerNameValue, paneId);
+      await resetTaskToPending(root, taskId, runtime.teamName, runtime.cwd);
+      throw new Error(`worker_pane_not_ready:${workerNameValue}`);
+    }
     if (agentType === "gemini") {
       const confirmed = await notifyPaneWithRetry(runtime.sessionName, paneId, "1");
       if (!confirmed) {
@@ -1803,7 +1756,7 @@ var import_os2 = require("os");
 // src/config/loader.ts
 var import_fs8 = require("fs");
 var import_path12 = require("path");
-var jsonc = __toESM(require_main(), 1);
+var jsonc = __toESM(require("jsonc-parser"), 1);
 
 // src/config/models.ts
 var BUILTIN_MODEL_HIGH = "claude-opus-4-6-20260205";

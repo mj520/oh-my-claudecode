@@ -1,3 +1,25 @@
+# oh-my-claudecode v4.6.0: Dev→Main Release Alignment & OMC Teams Shipping
+
+## Patch Notes
+
+This release formalizes the dev→main shipping workflow for OMC releases, bumps plugin/package metadata to 4.6.0, and validates release readiness with smoke and e2e-oriented test runs after loading the dev plugin in-session.
+
+### Release Process
+
+- **Dev→Main shipping flow**: release notes now explicitly capture dev as the integration branch and main as the shipping branch for final release publication.
+- **Version bump to 4.6.0**: updated package and plugin metadata to keep runtime, plugin manifest, marketplace metadata, and docs version markers aligned.
+
+### OMC Teams
+
+- **Ship `/omc-teams` with Codex workers**: release flow includes Codex-worker parallel review/validation as part of release readiness checks.
+
+### Verification
+
+- **Smoke test run**: execute smoke-focused Vitest suites before release.
+- **E2E test run**: execute e2e-scoped test selection (or explicit no-test result) as part of release gate.
+
+---
+
 # oh-my-claudecode v4.5.2: Security Hardening, Shared Memory Reliability & Team Stability
 
 ## Patch Notes
