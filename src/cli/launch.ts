@@ -246,13 +246,30 @@ export async function preLaunch(_cwd: string, _sessionId: string): Promise<void>
 }
 
 /**
+ * Check if args contain --print or -p flag.
+ * When in print mode, Claude outputs to stdout and must not be wrapped in tmux
+ * (which would capture stdout and prevent piping to the parent process).
+ */
+export function isPrintMode(args: string[]): boolean {
+  return args.some((arg) => arg === '--print' || arg === '-p');
+}
+
+/**
  * runClaude: Launch Claude CLI (blocks until exit)
  * Handles 3 scenarios:
  * 1. inside-tmux: Launch claude in current pane
  * 2. outside-tmux: Create new tmux session with claude
  * 3. direct: tmux not available, run claude directly
+ *
+ * When --print/-p is present, always runs direct to preserve stdout piping.
  */
 export function runClaude(cwd: string, args: string[], sessionId: string): void {
+  // Print mode must bypass tmux so stdout flows to the parent process (issue #1665)
+  if (isPrintMode(args)) {
+    runClaudeDirect(cwd, args);
+    return;
+  }
+
   const policy = resolveLaunchPolicy(process.env, args);
 
   switch (policy) {
