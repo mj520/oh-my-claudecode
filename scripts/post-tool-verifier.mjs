@@ -170,6 +170,8 @@ function stripClaudeTempCwdErrors(output) {
 // Pattern matching Claude Code's "Error: Exit code N" prefix line
 // Note: no /g flag — module-level regex with /g is stateful (.lastIndex persists across calls)
 const CLAUDE_EXIT_CODE_PREFIX = /^Error: Exit code \d+\s*$/m;
+const QUOTED_SPAN_PATTERN =
+  /"[^"\n]{1,400}"|'[^'\n]{1,400}'|“[^”\n]{1,400}”|‘[^’\n]{1,400}’/g;
 const NON_ACTIONABLE_ERROR_LINES = [
   /^\s*["']?severity["']?\s*[:=]\s*["']error["']?\s*[,}]?\s*$/i,
   /^\s*["']?totalErrors["']?\s*[:=]\s*0\b.*$/i,
@@ -177,6 +179,10 @@ const NON_ACTIONABLE_ERROR_LINES = [
   /^\s*["']?error["']?\s*:\s*["'][^"']*["']\s*[,}]?\s*$/i,
   /^\s*return\s*\{[^\n]*\berror\s*:\s*["'][^"']*["'][^\n]*\}\s*;?$/i,
 ];
+
+function stripQuotedSpans(output) {
+  return output.replace(QUOTED_SPAN_PATTERN, ' ');
+}
 
 function stripNonActionableErrorContext(output) {
   if (!output) return '';
@@ -222,7 +228,7 @@ export function isNonZeroExitWithOutput(output) {
     /abort/i,
   ];
 
-  return !contentErrorPatterns.some(p => p.test(remaining));
+  return !contentErrorPatterns.some(p => p.test(stripQuotedSpans(remaining)));
 }
 
 // Detect failures in Bash output
