@@ -243,7 +243,7 @@ export interface BackgroundTask {
 
 export interface MagicKeyword {
   triggers: string[];
-  action: (prompt: string, agentName?: string) => string;
+  action: (prompt: string, agentName?: string, modelId?: string) => string;
   description: string;
 }
 
