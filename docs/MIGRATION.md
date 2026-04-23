@@ -472,7 +472,7 @@ Next time keywords match → Solution auto-injects
 
 Storage:
 
-- **Project-level**: `.omc/skills/` (version-controlled)
+- **Project-level**: `.omc/skills/` (intended to be committed with the repo; uncommitted worktree-local skills disappear when that worktree is removed)
 - **User-level**: `~/.claude/skills/omc-learned/` (portable)
 
 #### 4. HUD Statusline (Real-Time Orchestration)

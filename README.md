@@ -270,7 +270,7 @@ Learn once, reuse forever. OMC extracts hard-won debugging knowledge into portab
 | | Project Scope | User Scope |
 |---|---|---|
 | **Path** | `.omc/skills/` | `~/.omc/skills/` |
-| **Shared with** | Team (version-controlled) | All your projects |
+| **Shared with** | Team (commit the skill file to keep it across worktrees) | All your projects |
 | **Priority** | Higher (overrides user) | Lower (fallback) |
 
 ```yaml
@@ -287,6 +287,8 @@ Wrap handler at server.py:42 in try/except ClientDisconnectedError...
 **Manage skills:** `/skill list | add | remove | edit | search`
 **Auto-learn:** `/learner` extracts reusable patterns with strict quality gates
 **Auto-inject:** Matching skills load into context automatically — no manual recall needed
+
+Project-scoped skills are stored in `.omc/skills/` and are intended to be committed when you want them shared. If you create them inside a linked git worktree and do not commit them, they disappear when that worktree is removed.
 
 [Full feature list →](docs/REFERENCE.md)
 
