@@ -215,9 +215,11 @@ export interface WorkerInfo {
     pid?: number;
     pane_id?: string;
     working_dir?: string;
+    worktree_repo_root?: string;
     worktree_path?: string;
     worktree_branch?: string;
     worktree_detached?: boolean;
+    worktree_created?: boolean;
     team_state_root?: string;
     /**
      * Verdict-output file path for CLI-worker output contract (AC-7).

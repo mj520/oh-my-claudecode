@@ -558,7 +558,7 @@ async function withMailboxLock(teamName, workerName, cwd, fn) {
   while (Date.now() < deadline) {
     const result = await withLock(lockDir, fn);
     if (result.ok) return result.value;
-    await new Promise((resolve4) => setTimeout(resolve4, delayMs));
+    await new Promise((resolve5) => setTimeout(resolve5, delayMs));
     delayMs = Math.min(delayMs * 2, 200);
   }
   throw new Error(`Failed to acquire mailbox lock for ${workerName} after ${timeoutMs}ms`);
@@ -663,7 +663,7 @@ async function teamCreateTask(teamName, task, cwd) {
       return created;
     });
     if (result.ok) return result.value;
-    await new Promise((resolve4) => setTimeout(resolve4, delayMs));
+    await new Promise((resolve5) => setTimeout(resolve5, delayMs));
     delayMs = Math.min(delayMs * 2, 200);
   }
   throw new Error(`Failed to acquire task creation lock for team ${teamName} after ${timeoutMs}ms`);
@@ -703,7 +703,7 @@ async function teamUpdateTask(teamName, taskId, updates, cwd) {
       return merged;
     });
     if (result.ok) return result.value;
-    await new Promise((resolve4) => setTimeout(resolve4, delayMs));
+    await new Promise((resolve5) => setTimeout(resolve5, delayMs));
     delayMs = Math.min(delayMs * 2, 200);
   }
   throw new Error(`Failed to acquire task update lock for task ${taskId} in team ${teamName} after ${timeoutMs}ms`);
@@ -1093,7 +1093,7 @@ async function withDispatchLock(teamName, cwd, fn) {
         );
       }
       const jitter = 0.5 + Math.random() * 0.5;
-      await new Promise((resolve4) => setTimeout(resolve4, Math.floor(pollMs * jitter)));
+      await new Promise((resolve5) => setTimeout(resolve5, Math.floor(pollMs * jitter)));
       pollMs = Math.min(pollMs * 2, DISPATCH_LOCK_MAX_POLL_MS);
     }
   }
@@ -4915,7 +4915,7 @@ function withFileLockSync(lockPath, fn, opts) {
   }
 }
 function sleep2(ms) {
-  return new Promise((resolve4) => setTimeout(resolve4, ms));
+  return new Promise((resolve5) => setTimeout(resolve5, ms));
 }
 async function acquireFileLock(lockPath, opts) {
   const staleLockMs = opts?.staleLockMs ?? DEFAULT_STALE_LOCK_MS;
@@ -4958,41 +4958,62 @@ var init_file_lock = __esm({
 
 // src/team/git-worktree.ts
 import { existsSync as existsSync10, readFileSync as readFileSync7, rmSync as rmSync2 } from "node:fs";
-import { join as join15 } from "node:path";
+import { join as join15, resolve as resolve3 } from "node:path";
 import { execFileSync as execFileSync3 } from "node:child_process";
-function getWorktreePath(repoRoot, teamName, workerName) {
-  return join15(repoRoot, ".omc", "worktrees", sanitizeName(teamName), sanitizeName(workerName));
+function getWorkerWorktreePath(repoRoot, teamName, workerName) {
+  return join15(repoRoot, ".omc", "team", sanitizeName(teamName), "worktrees", sanitizeName(workerName));
 }
 function getBranchName(teamName, workerName) {
   return `omc-team/${sanitizeName(teamName)}/${sanitizeName(workerName)}`;
 }
+function gitOutput(repoRoot, args, cwd = repoRoot) {
+  return execFileSync3("git", args, { cwd, encoding: "utf-8", stdio: "pipe" });
+}
+function isWorktreeDirty(wtPath) {
+  try {
+    return gitOutput(wtPath, ["status", "--porcelain"], wtPath).trim() !== "";
+  } catch {
+    return existsSync10(wtPath);
+  }
+}
 function getMetadataPath(repoRoot, teamName) {
+  return join15(repoRoot, ".omc", "state", "team", sanitizeName(teamName), "worktrees.json");
+}
+function getLegacyMetadataPath(repoRoot, teamName) {
   return join15(repoRoot, ".omc", "state", "team-bridge", sanitizeName(teamName), "worktrees.json");
 }
 function readMetadata(repoRoot, teamName) {
-  const metaPath = getMetadataPath(repoRoot, teamName);
-  if (!existsSync10(metaPath)) return [];
-  try {
-    return JSON.parse(readFileSync7(metaPath, "utf-8"));
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    process.stderr.write(`[omc] warning: worktrees.json parse error: ${msg}
+  const paths = [getMetadataPath(repoRoot, teamName), getLegacyMetadataPath(repoRoot, teamName)];
+  const byWorker = /* @__PURE__ */ new Map();
+  for (const metaPath of paths) {
+    if (!existsSync10(metaPath)) continue;
+    try {
+      const entries = JSON.parse(readFileSync7(metaPath, "utf-8"));
+      for (const entry of entries) byWorker.set(entry.workerName, entry);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      process.stderr.write(`[omc] warning: worktrees.json parse error: ${msg}
 `);
-    return [];
+    }
   }
+  return [...byWorker.values()];
 }
 function writeMetadata(repoRoot, teamName, entries) {
   const metaPath = getMetadataPath(repoRoot, teamName);
   validateResolvedPath(metaPath, repoRoot);
-  const dir = join15(repoRoot, ".omc", "state", "team-bridge", sanitizeName(teamName));
-  ensureDirWithMode(dir);
+  ensureDirWithMode(join15(repoRoot, ".omc", "state", "team", sanitizeName(teamName)));
   atomicWriteJson(metaPath, entries);
 }
 function removeWorkerWorktree(teamName, workerName, repoRoot) {
-  const wtPath = getWorktreePath(repoRoot, teamName, workerName);
+  const wtPath = getWorkerWorktreePath(repoRoot, teamName, workerName);
   const branch = getBranchName(teamName, workerName);
+  if (existsSync10(wtPath) && isWorktreeDirty(wtPath)) {
+    const err = new Error(`worktree_dirty: preserving dirty worktree at ${wtPath}`);
+    err.name = "worktree_dirty";
+    throw err;
+  }
   try {
-    execFileSync3("git", ["worktree", "remove", "--force", wtPath], { cwd: repoRoot, stdio: "pipe" });
+    execFileSync3("git", ["worktree", "remove", wtPath], { cwd: repoRoot, stdio: "pipe" });
   } catch {
   }
   try {
@@ -5005,19 +5026,26 @@ function removeWorkerWorktree(teamName, workerName, repoRoot) {
   }
   const metaLockPath = getMetadataPath(repoRoot, teamName) + ".lock";
   withFileLockSync(metaLockPath, () => {
-    const existing = readMetadata(repoRoot, teamName);
-    const updated = existing.filter((e) => e.workerName !== workerName);
+    const updated = readMetadata(repoRoot, teamName).filter((e) => e.workerName !== workerName);
     writeMetadata(repoRoot, teamName, updated);
   });
 }
 function cleanupTeamWorktrees(teamName, repoRoot) {
+  const removed = [];
+  const preserved = [];
   const entries = readMetadata(repoRoot, teamName);
   for (const entry of entries) {
     try {
       removeWorkerWorktree(teamName, entry.workerName, repoRoot);
-    } catch {
+      removed.push(entry);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      preserved.push({ info: entry, reason });
+      process.stderr.write(`[omc] warning: preserving worktree for ${entry.workerName}: ${reason}
+`);
     }
   }
+  return { removed, preserved };
 }
 var init_git_worktree = __esm({
   "src/team/git-worktree.ts"() {
@@ -5822,7 +5850,7 @@ __export(runtime_v2_exports, {
   startTeamV2: () => startTeamV2,
   writeWatchdogFailedMarker: () => writeWatchdogFailedMarker
 });
-import { join as join18, resolve as resolve3 } from "path";
+import { join as join18, resolve as resolve4 } from "path";
 import { existsSync as existsSync15 } from "fs";
 import { mkdir as mkdir7, readdir as readdir2, readFile as readFile9, writeFile as writeFile5 } from "fs/promises";
 import { performance } from "perf_hooks";
@@ -5998,7 +6026,7 @@ async function waitForWorkerStartupEvidence(teamName, workerName, taskId, cwd, a
       return true;
     }
     if (attempt < attempts) {
-      await new Promise((resolve4) => setTimeout(resolve4, delayMs));
+      await new Promise((resolve5) => setTimeout(resolve5, delayMs));
     }
   }
   return false;
@@ -6168,7 +6196,7 @@ async function spawnV2Worker(opts) {
 }
 async function startTeamV2(config) {
   const sanitized = sanitizeTeamName(config.teamName);
-  const leaderCwd = resolve3(config.cwd);
+  const leaderCwd = resolve4(config.cwd);
   validateTeamName(sanitized);
   const pluginCfg = config.pluginConfig ?? loadConfig();
   const resolvedRouting = buildResolvedRoutingSnapshot(pluginCfg);
@@ -7080,7 +7108,7 @@ async function readJsonSafe2(filePath) {
         return null;
       }
     }
-    await new Promise((resolve4) => setTimeout(resolve4, 25));
+    await new Promise((resolve5) => setTimeout(resolve5, 25));
   }
   return null;
 }
@@ -8225,7 +8253,7 @@ async function waitForTeamJob(jobId, options = {}) {
     if (status2.status !== "running") {
       return status2;
     }
-    await new Promise((resolve4) => setTimeout(resolve4, delayMs));
+    await new Promise((resolve5) => setTimeout(resolve5, delayMs));
     delayMs = Math.min(Math.floor(delayMs * 1.5), 2e3);
   }
   const status = await getTeamJobStatus(jobId);

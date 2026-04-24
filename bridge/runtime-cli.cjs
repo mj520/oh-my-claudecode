@@ -1078,7 +1078,7 @@ function withFileLockSync(lockPath, fn, opts) {
   }
 }
 function sleep2(ms) {
-  return new Promise((resolve5) => setTimeout(resolve5, ms));
+  return new Promise((resolve6) => setTimeout(resolve6, ms));
 }
 async function acquireFileLock(lockPath, opts) {
   const staleLockMs = opts?.staleLockMs ?? DEFAULT_STALE_LOCK_MS;
@@ -3237,39 +3237,60 @@ function validateResolvedPath(resolvedPath, expectedBase) {
 // src/team/git-worktree.ts
 init_tmux_session();
 init_file_lock();
-function getWorktreePath(repoRoot, teamName, workerName2) {
-  return (0, import_node_path.join)(repoRoot, ".omc", "worktrees", sanitizeName(teamName), sanitizeName(workerName2));
+function getWorkerWorktreePath(repoRoot, teamName, workerName2) {
+  return (0, import_node_path.join)(repoRoot, ".omc", "team", sanitizeName(teamName), "worktrees", sanitizeName(workerName2));
 }
 function getBranchName(teamName, workerName2) {
   return `omc-team/${sanitizeName(teamName)}/${sanitizeName(workerName2)}`;
 }
+function gitOutput(repoRoot, args, cwd = repoRoot) {
+  return (0, import_node_child_process.execFileSync)("git", args, { cwd, encoding: "utf-8", stdio: "pipe" });
+}
+function isWorktreeDirty(wtPath) {
+  try {
+    return gitOutput(wtPath, ["status", "--porcelain"], wtPath).trim() !== "";
+  } catch {
+    return (0, import_node_fs.existsSync)(wtPath);
+  }
+}
 function getMetadataPath(repoRoot, teamName) {
+  return (0, import_node_path.join)(repoRoot, ".omc", "state", "team", sanitizeName(teamName), "worktrees.json");
+}
+function getLegacyMetadataPath(repoRoot, teamName) {
   return (0, import_node_path.join)(repoRoot, ".omc", "state", "team-bridge", sanitizeName(teamName), "worktrees.json");
 }
 function readMetadata(repoRoot, teamName) {
-  const metaPath = getMetadataPath(repoRoot, teamName);
-  if (!(0, import_node_fs.existsSync)(metaPath)) return [];
-  try {
-    return JSON.parse((0, import_node_fs.readFileSync)(metaPath, "utf-8"));
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    process.stderr.write(`[omc] warning: worktrees.json parse error: ${msg}
+  const paths = [getMetadataPath(repoRoot, teamName), getLegacyMetadataPath(repoRoot, teamName)];
+  const byWorker = /* @__PURE__ */ new Map();
+  for (const metaPath of paths) {
+    if (!(0, import_node_fs.existsSync)(metaPath)) continue;
+    try {
+      const entries = JSON.parse((0, import_node_fs.readFileSync)(metaPath, "utf-8"));
+      for (const entry of entries) byWorker.set(entry.workerName, entry);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      process.stderr.write(`[omc] warning: worktrees.json parse error: ${msg}
 `);
-    return [];
+    }
   }
+  return [...byWorker.values()];
 }
 function writeMetadata(repoRoot, teamName, entries) {
   const metaPath = getMetadataPath(repoRoot, teamName);
   validateResolvedPath(metaPath, repoRoot);
-  const dir = (0, import_node_path.join)(repoRoot, ".omc", "state", "team-bridge", sanitizeName(teamName));
-  ensureDirWithMode(dir);
+  ensureDirWithMode((0, import_node_path.join)(repoRoot, ".omc", "state", "team", sanitizeName(teamName)));
   atomicWriteJson(metaPath, entries);
 }
 function removeWorkerWorktree(teamName, workerName2, repoRoot) {
-  const wtPath = getWorktreePath(repoRoot, teamName, workerName2);
+  const wtPath = getWorkerWorktreePath(repoRoot, teamName, workerName2);
   const branch = getBranchName(teamName, workerName2);
+  if ((0, import_node_fs.existsSync)(wtPath) && isWorktreeDirty(wtPath)) {
+    const err = new Error(`worktree_dirty: preserving dirty worktree at ${wtPath}`);
+    err.name = "worktree_dirty";
+    throw err;
+  }
   try {
-    (0, import_node_child_process.execFileSync)("git", ["worktree", "remove", "--force", wtPath], { cwd: repoRoot, stdio: "pipe" });
+    (0, import_node_child_process.execFileSync)("git", ["worktree", "remove", wtPath], { cwd: repoRoot, stdio: "pipe" });
   } catch {
   }
   try {
@@ -3282,19 +3303,26 @@ function removeWorkerWorktree(teamName, workerName2, repoRoot) {
   }
   const metaLockPath = getMetadataPath(repoRoot, teamName) + ".lock";
   withFileLockSync(metaLockPath, () => {
-    const existing = readMetadata(repoRoot, teamName);
-    const updated = existing.filter((e) => e.workerName !== workerName2);
+    const updated = readMetadata(repoRoot, teamName).filter((e) => e.workerName !== workerName2);
     writeMetadata(repoRoot, teamName, updated);
   });
 }
 function cleanupTeamWorktrees(teamName, repoRoot) {
+  const removed = [];
+  const preserved = [];
   const entries = readMetadata(repoRoot, teamName);
   for (const entry of entries) {
     try {
       removeWorkerWorktree(teamName, entry.workerName, repoRoot);
-    } catch {
+      removed.push(entry);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      preserved.push({ info: entry, reason });
+      process.stderr.write(`[omc] warning: preserving worktree for ${entry.workerName}: ${reason}
+`);
     }
   }
+  return { removed, preserved };
 }
 
 // src/team/task-file-ops.ts
@@ -3497,7 +3525,7 @@ async function readJsonSafe(filePath) {
         return null;
       }
     }
-    await new Promise((resolve5) => setTimeout(resolve5, 25));
+    await new Promise((resolve6) => setTimeout(resolve6, 25));
   }
   return null;
 }
@@ -3615,7 +3643,7 @@ async function nextPendingTaskIndex(runtime) {
     let task = await readTask(root, taskId);
     if (!task) {
       for (let attempt = 1; attempt < transientReadRetryAttempts; attempt++) {
-        await new Promise((resolve5) => setTimeout(resolve5, transientReadRetryDelayMs));
+        await new Promise((resolve6) => setTimeout(resolve6, transientReadRetryDelayMs));
         task = await readTask(root, taskId);
         if (task) break;
       }
@@ -4690,7 +4718,7 @@ async function waitForSentinelReadiness(options = {}) {
   }
   const deadline = startedAt + timeoutMs;
   while (Date.now() < deadline) {
-    await new Promise((resolve5) => setTimeout(resolve5, pollIntervalMs));
+    await new Promise((resolve6) => setTimeout(resolve6, pollIntervalMs));
     attempts += 1;
     latest = checkSentinelReadiness(options);
     if (latest.ready) {
@@ -5203,7 +5231,7 @@ async function withDispatchLock(teamName, cwd, fn) {
         );
       }
       const jitter = 0.5 + Math.random() * 0.5;
-      await new Promise((resolve5) => setTimeout(resolve5, Math.floor(pollMs * jitter)));
+      await new Promise((resolve6) => setTimeout(resolve6, Math.floor(pollMs * jitter)));
       pollMs = Math.min(pollMs * 2, DISPATCH_LOCK_MAX_POLL_MS);
     }
   }
@@ -6022,7 +6050,7 @@ async function waitForWorkerStartupEvidence(teamName, workerName2, taskId, cwd, 
       return true;
     }
     if (attempt < attempts) {
-      await new Promise((resolve5) => setTimeout(resolve5, delayMs));
+      await new Promise((resolve6) => setTimeout(resolve6, delayMs));
     }
   }
   return false;
