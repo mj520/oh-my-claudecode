@@ -314,9 +314,17 @@ export function cleanupTransientState(directory: string): number {
       // Ignore errors
     }
 
-    // Clean up cancel signal files and empty session directories
+    // Clean up cancel signal files, stale per-session transient caches,
+    // and empty session directories.
     const sessionsDir = path.join(stateDir, 'sessions');
     if (fs.existsSync(sessionsDir)) {
+      const sessionTransientPatterns = [
+        /^cancel-signal/,
+        /stop-breaker/,
+        // HUD's stdin cache is now session-scoped (see `src/hud/stdin.ts`).
+        // Treat it as transient so session dirs can still be pruned.
+        /^hud-stdin-cache\.json$/,
+      ];
       try {
         const sessionDirs = fs.readdirSync(sessionsDir);
         for (const sid of sessionDirs) {
@@ -327,7 +335,7 @@ export function cleanupTransientState(directory: string): number {
 
             const sessionFiles = fs.readdirSync(sessionDir);
             for (const file of sessionFiles) {
-              if (/^cancel-signal/.test(file) || /stop-breaker/.test(file)) {
+              if (sessionTransientPatterns.some(p => p.test(file))) {
                 try {
                   fs.unlinkSync(path.join(sessionDir, file));
                   filesRemoved++;
